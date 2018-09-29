@@ -1,0 +1,11 @@
+## Interface: 80000
+## Title: Town of Darkshire
+## Version: v0.0.1
+## Author: Arwic-Frostmourne
+## Notes: Social deduction game based on Town of Salem
+## SavedVariables: TownOfDarkshireDB
+
+Core.lua
+Roles.lua
+Graphics.lua
+Game.lua
