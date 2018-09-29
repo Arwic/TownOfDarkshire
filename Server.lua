@@ -200,6 +200,7 @@ function s.EndPhase(phase)
         s.BeginNewPhase("Night")
     elseif phase == "Night" then
         s.DoNightActions()
+        s.dayNumber = s.dayNumber + 1
         s.BeginNewPhase("Discussion")
     elseif phase == "Discussion" then
         s.BeginNewPhase("Voting")
