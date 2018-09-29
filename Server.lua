@@ -134,6 +134,7 @@ function s.OnFirstJoin(player_id, msg)
     msg = msg .. player.name .. "^"
     msg = msg .. player.role .. "^"
     s.SendMsg(msg, player_id)
+    s.SendRoleList(player_id)
     s.SendPlayerListToAll()
 
     -- start the game once it is full
@@ -142,11 +143,35 @@ function s.OnFirstJoin(player_id, msg)
     end
 end
 
+function s.GetPlayerNickname(id)
+    for k,v in pairs(s.players) do
+        if v.id == id then
+            return v.name
+        end
+    end
+    return "Unknown"
+end
+
+function s.ParseChatMsg(sender, msg)
+    -- TODO: add whisper support
+    -- TODO: add nighttime chat support for mafia
+    local parts = str_split(msg, "^")
+    local msg = parts[2]
+    
+    if str_starts(msg, "/w") then
+        -- handle whisper
+    elseif phase ~= "Defense" and phase ~= "Last Words" and phase ~= "Night" then 
+        -- TODO: let player on stand talk in last words and maf at night
+        local msg = format("CHATPLAYER^%s: %s", s.GetPlayerNickname(sender), msg)
+        s.SendMsgToAll(msg)
+    end
+end
+
 function s.ParseAddOnMessage(prefix, msg, distribution_type, sender)
     if str_starts(msg, "FIRST_JOIN") then
         s.OnFirstJoin(sender, msg)
-    elseif str_starts(msg, "REQ_ROLELIST") then
-        s.SendRoleList(sender)
+    elseif str_starts(msg, "CHATMSG") then
+        s.ParseChatMsg(sender, msg)
     end
 end
 
@@ -174,7 +199,7 @@ function s.EndPhase(phase)
     if phase == "Day 1" then
         s.BeginNewPhase("Night")
     elseif phase == "Night" then
-        -- TODO: night actions
+        s.DoNightActions()
         s.BeginNewPhase("Discussion")
     elseif phase == "Discussion" then
         s.BeginNewPhase("Voting")

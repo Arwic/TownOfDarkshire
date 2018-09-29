@@ -94,6 +94,8 @@ function tod.gui.Graveyard.Build(mainFrame)
     for i=1,15 do
         local lbl = NewLabel(graveyardFrame, 18, "")
         lbl:SetPoint("TOP", lastlbl, "BOTTOM")
+        lbl:SetPoint("LEFT", graveyardFrame, "LEFT")
+        lbl:SetJustifyH("LEFT")
         lastlbl = lbl
         table.insert(gy.Labels, lbl)
     end
@@ -118,10 +120,50 @@ end
 tod.gui.Chat = {}
 
 function tod.gui.Chat.Build(mainFrame)
+    local chat = tod.gui.Chat
     local chatFrame = CreateFrame("Frame", "ARWIC_TOD_chatFrame", mainFrame)
     CreateFrameTexture(chatFrame)
     local titleBar = NewTitleBar(chatFrame, "Chat")
+
+    local editBox = CreateFrame("EditBox", "ARWIC_TOD_chatFrame_editBox", chatFrame)
+    editBox:SetHeight(30)
+    editBox:SetPoint("BOTTOMLEFT", chatFrame, "BOTTOMLEFT")
+    editBox:SetPoint("BOTTOMRIGHT", chatFrame, "BOTTOMRIGHT")
+    editBox:SetFont("fonts/ARIALN.ttf", 20)
+    editBox:SetAutoFocus(false)
+    editBox:SetScript("OnEnterPressed", function(self)
+        local str = self:GetText()
+        self:SetText("")
+        tod.client.OnChatBoxEnterPressed(str)
+    end)
+    editBox:SetScript("OnEscapePressed", function(self)
+        self:ClearFocus()
+    end)
+
+    chat.Labels = {}
+    local lastlbl = editBox
+    for i=1,15 do
+        local lbl = NewLabel(chatFrame, 18, "")
+        lbl:SetPoint("BOTTOM", lastlbl, "TOP", 0, 0)
+        lbl:SetPoint("LEFT", chatFrame, "LEFT")
+        lbl:SetJustifyH("LEFT")
+        lastlbl = lbl
+        table.insert(chat.Labels, lbl)
+    end
+
     return chatFrame
+end
+
+function tod.gui.Chat.AddMessage(msg)
+    local chat = tod.gui.Chat
+    if chat.history == nil then chat.history = {} end
+    table.insert(chat.history, msg)
+    
+    local histLen = table_length(chat.history)
+    for i=1,15 do
+        local j = histLen - i + 1
+        chat.Labels[i]:SetText(chat.history[j])
+    end
 end
 
 ---------- INFO ----------
@@ -160,6 +202,8 @@ function tod.gui.RoleList.Build(mainFrame)
     for i=1,15 do
         local lbl = NewLabel(roleListFrame, 18, "...")
         lbl:SetPoint("TOP", lastlbl, "BOTTOM")
+        lbl:SetPoint("LEFT", roleListFrame, "LEFT")
+        lbl:SetJustifyH("LEFT")
         lastlbl = lbl
         table.insert(rl.Labels, lbl)
     end
@@ -191,6 +235,8 @@ function tod.gui.PlayerList.Build(mainFrame)
     for i=1,15 do
         local lbl = NewLabel(playerListFrame, 18, i.." ...")
         lbl:SetPoint("TOP", lastlbl, "BOTTOM")
+        lbl:SetPoint("LEFT", playerListFrame, "LEFT")
+        lbl:SetJustifyH("LEFT")
         lastlbl = lbl
         table.insert(pl.Labels, lbl)
     end

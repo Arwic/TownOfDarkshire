@@ -24,7 +24,7 @@ StaticPopupDialogs["ARWIC_TOD_INVITE"] = {
     button2 = "Decline",
     OnAccept = function(sender, host)
         local nickname = sender.editBox:GetText()
-        nickname = nickname:gsub('%A','')
+        nickname = nickname:gsub("%A","")
         c.JoinGame(host, nickname)
     end,
     timeout = 0,
@@ -73,9 +73,17 @@ function c.ParsePlayer(msg)
     local role = parts[3]
     tod.gui.TopBar.SetName(name)
     tod.gui.Info.SetRole(tonumber(role))
-    c.SendMsg("REQ_ROLELIST")
     -- show the UI now that we have our player data
     tod.gui.Show()
+end
+
+function c.OnChatBoxEnterPressed(str)
+    c.SendMsg("CHATMSG^" .. str)
+end
+
+function c.ParseChat_Player(msg)
+    local parts = str_split(msg, "^")
+    tod.gui.Chat.AddMessage(parts[2])
 end
 
 function c.ParseNewPhase(msg)
@@ -98,6 +106,8 @@ function c.ParseAddOnMessage(prefix, msg, distribution_type, sender)
         StaticPopup_Show("ARWIC_TOD_GAMEFULL", sender)
     elseif str_starts(msg, "PHASE") then
         c.ParseNewPhase(msg)
+    elseif str_starts(msg, "CHATPLAYER") then
+        c.ParseChat_Player(msg)
     end
 end
 
