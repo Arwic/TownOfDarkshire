@@ -78,7 +78,9 @@ function c.ParsePlayer(msg)
 end
 
 function c.OnChatBoxEnterPressed(str)
-    c.SendMsg("CHATMSG^" .. str)
+    if #str > 0 then
+        c.SendMsg("CHATMSG^" .. str)
+    end
 end
 
 function c.ParseChat_Player(msg)
@@ -96,17 +98,18 @@ function c.ParseAddOnMessage(prefix, msg, distribution_type, sender)
     if str_starts(msg, "INVITE") then
         local dialog = StaticPopup_Show("ARWIC_TOD_INVITE", sender)
         if dialog then dialog.data = sender end
-    elseif str_starts(msg, "PLAYER") then
+    elseif str_starts(msg, "PLAYER^") then
         c.ParsePlayer(msg)
-    elseif str_starts(msg, "ROLELIST") then
+    elseif str_starts(msg, "ROLELIST^") then
         c.ParseRoleList(msg)
-    elseif str_starts(msg, "PLAYERLIST") then
+    elseif str_starts(msg, "PLAYERLIST^") then
+        print("player list reced!")
         c.ParsePlayerList(msg)
-    elseif str_starts(msg, "GAMEFULL") then
+    elseif str_starts(msg, "GAMEFULL^") then
         StaticPopup_Show("ARWIC_TOD_GAMEFULL", sender)
-    elseif str_starts(msg, "PHASE") then
+    elseif str_starts(msg, "PHASE^") then
         c.ParseNewPhase(msg)
-    elseif str_starts(msg, "CHATPLAYER") then
+    elseif str_starts(msg, "CHATPLAYER^") then
         c.ParseChat_Player(msg)
     end
 end
