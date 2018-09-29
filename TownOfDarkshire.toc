@@ -5,7 +5,9 @@
 ## Notes: Social deduction game based on Town of Salem
 ## SavedVariables: TownOfDarkshireDB
 
+Extensions.lua
 Core.lua
 Roles.lua
 Graphics.lua
-Game.lua
+Server.lua
+Client.lua

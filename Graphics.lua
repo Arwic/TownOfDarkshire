@@ -127,7 +127,7 @@ function tod.gui.RoleList.Build(mainFrame)
 end
 
 -- sets all the labels in the role list, list of roles should contain "Town Investigative", "Random Town" etc. not exact names or role objects
-function tod.gui.Graveyard.UpdateRoleList(roleEntries)
+function tod.gui.RoleList.UpdateLabels(roleEntries)
     for i=1,15 do
         local lbl = tod.gui.RoleList.Labels[i]
         lbl:SetText(roleEntries[i])
