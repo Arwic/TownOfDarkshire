@@ -25,7 +25,7 @@ local function RegisterEvents()
     local eventFrame = CreateFrame("FRAME", "ARWIC_TOD_eventFrame")
     local tod = tod
     eventFrame:SetScript("OnEvent", function(self, event, ...)
-            tod.events[event](self, ...)
+        tod.events[event](self, ...)
     end)
     for k, v in pairs(tod.events) do
         eventFrame:RegisterEvent(k)

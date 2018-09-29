@@ -1,15 +1,12 @@
 local tod = ARWIC_TOD
 tod.gui = {}
 
----------- HELPERS ----------
+local str_starts = tod.ext.str_starts
+local str_split = tod.ext.str_split
+local table_length = tod.ext.table_length
+local table_shuffle = tod.ext.table_shuffle
 
-local function table_length(t)
-    local count = 0
-    for k, v in pairs(t) do
-        count = count + 1
-    end
-    return count
-end
+---------- HELPERS ----------
 
 local function NewLabel(parent, fontHeight, text)
     local str = parent:CreateFontString()
@@ -30,7 +27,7 @@ local function NewTitleBar(parent, text)
     titleBar.texture:SetAllPoints(titleBar)
     local titleBarText = NewLabel(titleBar, 20, text)
     titleBarText:SetAllPoints(titleBar)
-    return titleBar
+    return titleBar, titleBarText
 end
 
 local function CreateFrameTexture(frame)
@@ -45,10 +42,14 @@ tod.gui.TopBar = {}
 function tod.gui.TopBar.Build(mainFrame)
     local topBarFrame = CreateFrame("Frame", "ARWIC_TOD_topBarFrame", mainFrame)
     CreateFrameTexture(topBarFrame)
-    tod.gui.lblMyName = NewLabel(topBarFrame, 20, "MY_NAME")
-    tod.gui.lblMyName:SetPoint("LEFT", topBarFrame)
+    tod.gui.TopBar.lblMyName = NewLabel(topBarFrame, 20, "MY_NAME")
+    tod.gui.TopBar.lblMyName:SetPoint("LEFT", topBarFrame)
 
     return topBarFrame
+end
+
+function tod.gui.TopBar.SetName(name)
+    tod.gui.TopBar.lblMyName:SetText(name)
 end
 
 ---------- GRAVEYARD ----------
@@ -62,7 +63,7 @@ function tod.gui.Graveyard.Build(mainFrame)
     tod.gui.Graveyard.Labels = {}
     local lastlbl = titleBar
     for i=1,15 do
-        local lbl = NewLabel(graveyardFrame, 18, "NAME (ROLE)")
+        local lbl = NewLabel(graveyardFrame, 18, "")
         lbl:SetPoint("TOP", lastlbl, "BOTTOM")
         lastlbl = lbl
         table.insert(tod.gui.Graveyard.Labels, lbl)
@@ -100,9 +101,13 @@ function tod.gui.Info.Build(mainFrame)
     local infoFrame = CreateFrame("Frame", "ARWIC_TOD_infoFrame", mainFrame)
     CreateFrameTexture(infoFrame)
     infoFrame:SetSize(200, 500)
-    local titleBar = NewTitleBar(infoFrame, "ROLE_NAME")
+    tod.gui.Info.TitleBar, tod.gui.Info.TitleBarText = NewTitleBar(infoFrame, "ROLE_NAME")
 
     return infoFrame
+end
+
+function tod.gui.Info.SetRole(role_id)
+    tod.gui.Info.TitleBarText:SetText(tod.roles[role_id].name)
 end
 
 ---------- ROLE LIST ----------
@@ -117,7 +122,7 @@ function tod.gui.RoleList.Build(mainFrame)
     tod.gui.RoleList.Labels = {}
     local lastlbl = titleBar
     for i=1,15 do
-        local lbl = NewLabel(roleListFrame, 18, "role"..i)
+        local lbl = NewLabel(roleListFrame, 18, "...")
         lbl:SetPoint("TOP", lastlbl, "BOTTOM")
         lastlbl = lbl
         table.insert(tod.gui.RoleList.Labels, lbl)
@@ -143,16 +148,25 @@ function tod.gui.PlayerList.Build(mainFrame)
     playerListFrame:SetSize(200, 500)
     local titleBar = NewTitleBar(playerListFrame, "Player List")
     
-    playerListFrame.Labels = {}
+    tod.gui.PlayerList.Labels = {}
     local lastlbl = titleBar
     for i=1,15 do
-        local lbl = NewLabel(playerListFrame, 18, i.." PLAYER_NAME")
+        local lbl = NewLabel(playerListFrame, 18, i.." ...")
         lbl:SetPoint("TOP", lastlbl, "BOTTOM")
         lastlbl = lbl
-        table.insert(playerListFrame.Labels, lbl)
+        table.insert(tod.gui.PlayerList.Labels, lbl)
     end
 
     return playerListFrame
+end
+
+function tod.gui.PlayerList.UpdateLabels(players)
+    for i=1,15 do
+        local lbl = tod.gui.PlayerList.Labels[i]
+        if lbl ~= nil and players[i] ~= nil then
+            lbl:SetText(i .. " " .. players[i])
+        end
+    end
 end
 
 ---------- BUILD ----------
