@@ -1,19 +1,21 @@
 local tod = ARWIC_TOD
 tod.client = {}
+local c = tod.client
+
 
 local str_starts = tod.ext.str_starts
 local str_split = tod.ext.str_split
 local table_length = tod.ext.table_length
 
-function tod.client.SendMsg(msg)
-    C_ChatInfo.SendAddonMessage("ARWIC_TOD_SERVER", msg, "WHISPER", tod.client.host)
+function c.SendMsg(msg)
+    C_ChatInfo.SendAddonMessage("ARWIC_TOD_SERVER", msg, "WHISPER", c.host)
 end
 
-function tod.client.JoinGame(host, nickname)
-    tod.client.host = host
+function c.JoinGame(host, nickname)
+    c.host = host
     print("Joining game hosted by " .. host)
     tod.gui.Build()
-    tod.client.SendMsg("FIRST_JOIN^"..nickname)
+    c.SendMsg("FIRST_JOIN^"..nickname)
 end
 
 StaticPopupDialogs["ARWIC_TOD_INVITE"] = {
@@ -23,7 +25,7 @@ StaticPopupDialogs["ARWIC_TOD_INVITE"] = {
     OnAccept = function(sender, host)
         local nickname = sender.editBox:GetText()
         nickname = nickname:gsub('%A','')
-        tod.client.JoinGame(host, nickname)
+        c.JoinGame(host, nickname)
     end,
     timeout = 0,
     whileDead = true,
@@ -35,7 +37,16 @@ StaticPopupDialogs["ARWIC_TOD_INVITE"] = {
     end,
 }
 
-function tod.client.ParsePlayerList(msg)
+StaticPopupDialogs["ARWIC_TOD_GAMEFULL"] = {
+    text = "The game is full.",
+    button1 = "OK",
+    timeout = 0,
+    whileDead = true,
+    hideOnEscape = true,
+    preferredIndex = 3,
+}
+
+function c.ParsePlayerList(msg)
     print('parsing player list')
     local parts = str_split(msg, "^")
     local len = table_length(parts)
@@ -46,7 +57,7 @@ function tod.client.ParsePlayerList(msg)
     tod.gui.PlayerList.UpdateLabels(playerList)
 end
 
-function tod.client.ParseRoleList(msg)
+function c.ParseRoleList(msg)
     local parts = str_split(msg, "^")
     local len = table_length(parts)
     local roleList = {}
@@ -56,30 +67,37 @@ function tod.client.ParseRoleList(msg)
     tod.gui.RoleList.UpdateLabels(roleList)
 end
 
-function tod.client.ParsePlayer(msg)
+function c.ParsePlayer(msg)
     local parts = str_split(msg, "^")
     local name = parts[2]
     local role = parts[3]
     tod.gui.TopBar.SetName(name)
     tod.gui.Info.SetRole(tonumber(role))
-    tod.client.SendMsg("REQ_ROLELIST")
-    tod.client.SendMsg("REQ_PLAYERLIST")
+    c.SendMsg("REQ_ROLELIST")
     -- show the UI now that we have our player data
     tod.gui.Show()
 end
 
-function tod.client.ParseAddOnMessage(prefix, msg, distribution_type, sender)
-    if msg == "INVITE" then
+function c.ParseNewPhase(msg)
+    local parts = str_split(msg, "^")
+    local name = parts[2]
+    tod.gui.TopBar.SetPhase(name)
+end
+
+function c.ParseAddOnMessage(prefix, msg, distribution_type, sender)
+    if str_starts(msg, "INVITE") then
         local dialog = StaticPopup_Show("ARWIC_TOD_INVITE", sender)
         if dialog then dialog.data = sender end
-    end
-
-    if str_starts(msg, "PLAYER^") then
-        tod.client.ParsePlayer(msg)
-    elseif str_starts(msg, "ROLELIST^") then
-        tod.client.ParseRoleList(msg)
-    elseif str_starts(msg, "PLAYERLIST^") then
-        tod.client.ParsePlayerList(msg)
+    elseif str_starts(msg, "PLAYER") then
+        c.ParsePlayer(msg)
+    elseif str_starts(msg, "ROLELIST") then
+        c.ParseRoleList(msg)
+    elseif str_starts(msg, "PLAYERLIST") then
+        c.ParsePlayerList(msg)
+    elseif str_starts(msg, "GAMEFULL") then
+        StaticPopup_Show("ARWIC_TOD_GAMEFULL", sender)
+    elseif str_starts(msg, "PHASE") then
+        c.ParseNewPhase(msg)
     end
 end
 

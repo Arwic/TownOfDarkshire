@@ -1,6 +1,21 @@
 local tod = ARWIC_TOD
+tod.data = {}
 
-tod.roles = {
+-- TODO: rename file to Data.lua
+
+tod.data.phaseLengths = {
+    ["Waiting for Players"] = -1,
+    ["Day 1"] = 15,
+    ["Discussion"] = 45,
+    ["Voting"] = 30,
+    ["Defense"] = 20,
+    ["Judgement"] = 20,
+    ["Last Words"] = 5,
+    ["Night"] = 30,
+}
+
+tod.data.roles = {
+    [-1] = { name = "ERR_UNKNOWN_ROLE" },
     -- Town Investigative
     [0] = {
         id = 0,
@@ -25,14 +40,16 @@ tod.roles = {
         victory_conditions = {
             "town"
         },
+        visiting = true,
         night_action = function(self, target)
             local lines = {}
-            if contains(self.night_attrs, "rb") then
-                table.insert(lines, "Someone occupied your night. You were role blocked!")
-                return lines
+            if target == nil then
+                table.insert(lines, "You did not perform you're night action.")
+            else
+                local target_role = tod.data.roles[target.role]
+                table.insert(lines, target_role.invest_results)
             end
-            local target_role = aura_env.c.roles[target.role]
-            return target_role.invest_results
+            return lines
         end,
         day_action = function()
         end,
